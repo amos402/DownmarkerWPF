@@ -5,13 +5,12 @@ using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Caliburn.Micro;
-using CookComputing.XmlRpc;
 using ICSharpCode.AvalonEdit.Document;
 using MarkPad.Framework;
 using MarkPad.HyperlinkEditor;
-using MarkPad.Metaweblog;
 using MarkPad.Services.Implementation;
 using MarkPad.Services.Interfaces;
+using MarkPad.Services.Metaweblog;
 using MarkPad.Services.Settings;
 using Ookii.Dialogs.Wpf;
 
@@ -25,6 +24,7 @@ namespace MarkPad.Document
         private readonly ISettingsProvider settings;
         private readonly IWindowManager windowManager;
         private readonly ISiteContextGenerator siteContextGenerator;
+        private readonly Func<string, IMetaWeblogService> getMetaWeblog;
 
         private readonly TimeSpan delay = TimeSpan.FromSeconds(0.5);
         private readonly DispatcherTimer timer;
@@ -33,12 +33,18 @@ namespace MarkPad.Document
         private string filename;
         private ISiteContext siteContext;
 
-        public DocumentViewModel(IDialogService dialogService, ISettingsProvider settings, IWindowManager windowManager, ISiteContextGenerator siteContextGenerator)
+        public DocumentViewModel(
+            IDialogService dialogService, 
+            ISettingsProvider settings, 
+            IWindowManager windowManager, 
+            ISiteContextGenerator siteContextGenerator, 
+            Func<string, IMetaWeblogService> getMetaWeblog)
         {
             this.dialogService = dialogService;
             this.settings = settings;
             this.windowManager = windowManager;
             this.siteContextGenerator = siteContextGenerator;
+            this.getMetaWeblog = getMetaWeblog;
 
             title = "New Document";
             Original = "";
@@ -253,8 +259,8 @@ namespace MarkPad.Document
         {
             if (categories == null) categories = new string[0];
 
-            var proxy = new MetaWeblog(blog.WebAPI);
-
+            var proxy = getMetaWeblog(blog.WebAPI);
+            
             var newpost = new Post();
             try
             {
@@ -274,32 +280,28 @@ namespace MarkPad.Document
                                    description = blog.Language == "HTML" ? renderBody : Document.Text,
                                    categories = categories
                                };
-                    newpost.postid = proxy.NewPost(blog.BlogInfo.blogid, blog.Username, blog.Password, newpost, true);
+                    newpost.postid = proxy.NewPostAsync(blog, newpost, true).Result;
                 }
                 else
                 {
-                    newpost = proxy.GetPost(postid, blog.Username, blog.Password);
+                    newpost = proxy.GetPostAsync(postid, blog).Result;
                     newpost.title = postTitle;
                     newpost.description = blog.Language == "HTML" ? renderBody : Document.Text;
                     newpost.categories = categories;
                     newpost.format = blog.Language;
 
-                    proxy.EditPost(postid, blog.Username, blog.Password, newpost, true);
+                    proxy.EditPostAsync(postid, blog, newpost, true);
                 }
             }
             catch (WebException ex)
             {
                 dialogService.ShowError("Error Publishing", ex.Message, "");
             }
-            catch (XmlRpcException ex)
+            catch (Exception ex)
             {
                 dialogService.ShowError("Error Publishing", ex.Message, "");
             }
-            catch (XmlRpcFaultException ex)
-            {
-                dialogService.ShowError("Error Publishing", ex.Message, "");
-            }
-
+            
             Post = newpost;
             Original = Document.Text;
             title = postTitle;
