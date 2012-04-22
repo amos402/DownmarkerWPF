@@ -4,6 +4,8 @@ using NSync.Client;
 
 namespace MarkPad.Updater
 {
+    // TODO: once app flow basics are in place, ensure state transitions work
+
     public class UpdaterViewModel : PropertyChangedBase
     {
         private readonly IWindowManager windowManager;
@@ -23,11 +25,6 @@ namespace MarkPad.Updater
             this.changesCreator = changesCreator;
 
             _manager = manager;
-            _manager.CheckForUpdate()
-                    .Subscribe(CheckRelease, CheckException);
-
-            UpdateState = UpdateState.Downloading;
-            Background = true;
         }
 
         private void CheckRelease(UpdateInfo updateInfo)
@@ -47,7 +44,8 @@ namespace MarkPad.Updater
             windowManager.ShowDialog(vm);
             if (!vm.WasCancelled)
             {
-                // TODO: copy files into new location
+                _manager.ApplyReleases(updateInfo.ReleasesToApply);
+                // TODO: when completed, close app and restart
             }
 
             Background = false;
