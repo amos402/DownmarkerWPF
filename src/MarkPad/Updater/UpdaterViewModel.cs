@@ -14,7 +14,10 @@ namespace MarkPad.Updater
         public UpdateState UpdateState { get; set; }
         public bool Background { get; set; }
 
-        public UpdaterViewModel(IWindowManager windowManager, Func<UpdaterChangesViewModel> changesCreator, IUpdateManager manager)
+        public UpdaterViewModel(
+            IWindowManager windowManager, 
+            Func<UpdaterChangesViewModel> changesCreator, 
+            IUpdateManager manager)
         {
             this.windowManager = windowManager;
             this.changesCreator = changesCreator;
@@ -60,33 +63,5 @@ namespace MarkPad.Updater
             _manager.CheckForUpdate()
                     .Subscribe(CheckRelease, CheckException);
         }
-
-        //private void SetUpdateFlag()
-        //{
-        //    switch (au.UpdateStepOn)
-        //    {
-        //        case UpdateStepOn.ExtractingUpdate:
-        //        case UpdateStepOn.DownloadingUpdate:
-        //            UpdateState = UpdateState.Downloading;
-        //            Background = true;
-        //            break;
-
-        //        case UpdateStepOn.UpdateDownloaded:
-        //        case UpdateStepOn.UpdateAvailable:
-        //            Background = false;
-        //            au.InstallNow();
-        //            break;
-
-        //        case UpdateStepOn.UpdateReadyToInstall:
-        //            UpdateState = UpdateState.UpdatePending;
-        //            Background = false;
-        //            break;
-
-        //        default:
-        //            UpdateState = UpdateState.Unchecked;
-        //            Background = false;
-        //            break;
-        //    }
-        //}
     }
 }

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows;
@@ -39,22 +40,30 @@ namespace MarkPad
 
         protected override void ConfigureContainer(ContainerBuilder builder)
         {
-            Func<string, Stream> pathResolver = a =>
-                                                    {
-                                                        var directory = Path.GetTempPath();
-                                                        var filePath = Path.Combine(directory, a);
-                                                        var dir = Path.GetDirectoryName(filePath);
-                                                        if (!Directory.Exists(dir))
-                                                        {
-                                                            Directory.CreateDirectory(dir);
-                                                        }
-                                                        return File.Open(filePath, FileMode.OpenOrCreate);
-                                                    };
+            Func<string, Stream> pathResolver = 
+                path =>
+                {
+                    var file = Assembly.GetExecutingAssembly().Location;
+                    var dir = Path.GetDirectoryName(file);
+                    var filePath = Path.Combine(dir, path);
+                    return File.Open(filePath, FileMode.OpenOrCreate);
+                };
+
+            Func<string, IObservable<string>> downloadFiles = 
+                url =>
+                {
+                    var file = Assembly.GetExecutingAssembly().Location;
+                    var dir = Path.GetDirectoryName(file);
+                    var tempFile = Path.Combine(dir, "updates.txt");
+                    var fileContents = File.ReadAllLines(tempFile);
+                    return fileContents.ToObservable();
+                };
 
             builder.RegisterType<NSync.Client.UpdateManager>()
                 .AsImplementedInterfaces()
-                .WithParameter(new NamedParameter("url", "http://deploy.code52.org/markpad/releases"))
-                .WithParameter(new NamedParameter("openPathMock", pathResolver));
+                .WithParameter(new NamedParameter("url", "http://localhost:2829/markpad/releases"))
+                .WithParameter(new NamedParameter("openPath", pathResolver))
+                .WithParameter(new NamedParameter("downloadUrl", downloadFiles));
 
             builder.RegisterModule<ServicesModule>();
             builder.RegisterType<JumpListIntegration>().SingleInstance();

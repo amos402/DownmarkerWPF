@@ -338,6 +338,9 @@
     <None Include="packages.config" />
     <AppDesigner Include="Properties\" />
     <EmbeddedResource Include="Syntax\Markdown.xshd" />
+    <Content Include="packages\RELEASES">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Page Include="Document\DocumentView.xaml">
@@ -412,6 +415,9 @@
     <EmbeddedResource Include="markpaddoc.ico" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="updates.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <EmbeddedResource Include="..\..\lib\Hunspell.0.9.6.0\lib\Hunspellx86.dll">
       <Link>Libs\x86\Hunspellx86.dll</Link>
     </EmbeddedResource>
