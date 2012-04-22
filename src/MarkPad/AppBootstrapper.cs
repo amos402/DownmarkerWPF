@@ -55,8 +55,7 @@ namespace MarkPad
                     var file = Assembly.GetExecutingAssembly().Location;
                     var dir = Path.GetDirectoryName(file);
                     var tempFile = Path.Combine(dir, "updates.txt");
-                    var fileContents = File.ReadAllLines(tempFile);
-                    return fileContents.ToObservable();
+                    return Observable.Return(File.ReadAllText(tempFile));
                 };
 
             builder.RegisterType<NSync.Client.UpdateManager>()
