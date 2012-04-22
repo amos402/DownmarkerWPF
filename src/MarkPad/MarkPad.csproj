@@ -135,9 +135,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Autofac.2.6.1.841\lib\NET40\Autofac.Configuration.dll</HintPath>
     </Reference>
-    <Reference Include="AutomaticUpdaterWPF">
-      <HintPath>..\..\lib\AutomaticUpdaterWPF.dll</HintPath>
-    </Reference>
     <Reference Include="Awesomium.Core, Version=1.6.3.0, Culture=neutral, PublicKeyToken=e1a0d7c8071a5214, processorArchitecture=x86">
       <HintPath>..\..\lib\Awesomium.Core.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
@@ -181,6 +178,9 @@
     <Reference Include="System.ComponentModel.Composition" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Reactive, Version=1.1.11111.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Rx_Experimental-Main.1.1.11111\lib\Net4\System.Reactive.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -332,9 +332,6 @@
     <EmbeddedResource Include="..\..\lib\AwesomiumProcess">
       <Link>Libs\x86\AwesomiumProcess</Link>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\..\tools\wyUpdate\client.wyc">
-      <Link>Updater\client.wyc</Link>
-    </EmbeddedResource>
     <EmbeddedResource Include="MarkdownHelp.md" />
     <EmbeddedResource Include="MarkPadHelp.md" />
     <None Include="app.config" />
@@ -368,6 +365,14 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\NSync\src\NSync.Client\NSync.Client.csproj">
+      <Project>{F23CEFD4-F1BA-4C37-A834-89A5E38055DD}</Project>
+      <Name>NSync.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\NSync\src\NSync.Core\NSync.Core.csproj">
+      <Project>{3D17D46A-A411-4922-B932-9EBE2AAE0ED7}</Project>
+      <Name>NSync.Core</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MarkPad.Services\MarkPad.Services.csproj">
       <Project>{8088D80C-14AF-4618-B12A-F47C2771EBDD}</Project>
       <Name>MarkPad.Services</Name>
@@ -409,9 +414,6 @@
   <ItemGroup>
     <EmbeddedResource Include="..\..\lib\Hunspell.0.9.6.0\lib\Hunspellx86.dll">
       <Link>Libs\x86\Hunspellx86.dll</Link>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\..\tools\wyUpdate\wyUpdate.exe">
-      <Link>Updater\wyUpdate.exe</Link>
     </EmbeddedResource>
     <Content Include="Themes\ChaosSquirrel\style.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

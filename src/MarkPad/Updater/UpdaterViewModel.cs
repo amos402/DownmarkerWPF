@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Reflection;
 using Caliburn.Micro;
-using wyDay.Controls;
+using NSync.Client;
 
 namespace MarkPad.Updater
 {
@@ -10,105 +8,85 @@ namespace MarkPad.Updater
     {
         private readonly IWindowManager windowManager;
         private readonly Func<UpdaterChangesViewModel> changesCreator;
-        static AutomaticUpdaterBackend au;
+        private readonly IUpdateManager _manager;
 
         public int Progress { get; private set; }
         public UpdateState UpdateState { get; set; }
         public bool Background { get; set; }
 
-        public UpdaterViewModel(IWindowManager windowManager, Func<UpdaterChangesViewModel> changesCreator)
+        public UpdaterViewModel(IWindowManager windowManager, Func<UpdaterChangesViewModel> changesCreator, IUpdateManager manager)
         {
             this.windowManager = windowManager;
             this.changesCreator = changesCreator;
 
-            au = new AutomaticUpdaterBackend
+            _manager = manager;
+            _manager.CheckForUpdate()
+                    .Subscribe(CheckRelease, CheckException);
+
+            UpdateState = UpdateState.Downloading;
+            Background = true;
+        }
+
+        private void CheckRelease(UpdateInfo updateInfo)
+        {
+            if (updateInfo == null)
             {
-                GUID = "code52-markpad",
-                UpdateType = UpdateType.CheckAndDownload
-            };
+                UpdateState = UpdateState.UpToDate;
+                Background = false;
+                return;
+            }
 
-            au.ProgressChanged += AuProgressChanged;
-            au.ReadyToBeInstalled += AuReadyToBeInstalled;
-            au.UpToDate += AuUpToDate;
-            au.UpdateAvailable += AuUpdateAvailable;
-            au.UpdateSuccessful += AuUpdateSuccessful;
+            UpdateState = UpdateState.UpdatePending;
 
-            au.Initialize();
-            au.AppLoaded();
-            SetUpdateFlag();
+            var vm = changesCreator();
+            vm.Version = updateInfo.Version;
+            vm.Message = "You should really install this update now!";
+            windowManager.ShowDialog(vm);
+            if (!vm.WasCancelled)
+            {
+                // TODO: copy files into new location
+            }
+
+            Background = false;
         }
 
-        void AuUpdateAvailable(object sender, EventArgs e)
+        private void CheckException(Exception obj)
         {
-            SetUpdateFlag();
-        }
-
-        void AuUpToDate(object sender, SuccessArgs e)
-        {
-            SetUpdateFlag();
-        }
-
-        void AuProgressChanged(object sender, int progress)
-        {
-            Progress = progress;
-        }
-
-        private void AuUpdateSuccessful(object sender, SuccessArgs e)
-        {
-            SetUpdateFlag();
-        }
-
-        private void AuReadyToBeInstalled(object sender, EventArgs e)
-        {
-            SetUpdateFlag();
+            UpdateState = UpdateState.Error;
         }
 
         public void CheckForUpdate()
         {
-            switch (au.UpdateStepOn)
-            {
-                case UpdateStepOn.UpdateReadyToInstall:
-                    var vm = changesCreator();
-                    vm.Message = au.Changes;
-                    windowManager.ShowDialog(vm);
-                    if (!vm.WasCancelled)
-                        au.InstallNow();
-                    break;
-
-                case UpdateStepOn.Nothing:
-                    Background = true;
-                    au.ForceCheckForUpdate();
-                    break;
-
-            }
+            _manager.CheckForUpdate()
+                    .Subscribe(CheckRelease, CheckException);
         }
 
-        private void SetUpdateFlag()
-        {
-            switch (au.UpdateStepOn)
-            {
-                case UpdateStepOn.ExtractingUpdate:
-                case UpdateStepOn.DownloadingUpdate:
-                    UpdateState = UpdateState.Downloading;
-                    Background = true;
-                    break;
+        //private void SetUpdateFlag()
+        //{
+        //    switch (au.UpdateStepOn)
+        //    {
+        //        case UpdateStepOn.ExtractingUpdate:
+        //        case UpdateStepOn.DownloadingUpdate:
+        //            UpdateState = UpdateState.Downloading;
+        //            Background = true;
+        //            break;
 
-                case UpdateStepOn.UpdateDownloaded:
-                case UpdateStepOn.UpdateAvailable:
-                    Background = false;
-                    au.InstallNow();
-                    break;
+        //        case UpdateStepOn.UpdateDownloaded:
+        //        case UpdateStepOn.UpdateAvailable:
+        //            Background = false;
+        //            au.InstallNow();
+        //            break;
 
-                case UpdateStepOn.UpdateReadyToInstall:
-                    UpdateState = UpdateState.UpdatePending;
-                    Background = false;
-                    break;
+        //        case UpdateStepOn.UpdateReadyToInstall:
+        //            UpdateState = UpdateState.UpdatePending;
+        //            Background = false;
+        //            break;
 
-                default:
-                    UpdateState = UpdateState.Unchecked;
-                    Background = false;
-                    break;
-            }
-        }
+        //        default:
+        //            UpdateState = UpdateState.Unchecked;
+        //            Background = false;
+        //            break;
+        //    }
+        //}
     }
 }

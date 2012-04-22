@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>MarkPad</id>
+    <version>0.0</version>
+    <authors>shiftkey aeoth distantcam jakeginnivan belfryimages ...</authors>
+    <owners>shiftkey aeoth distantcam jakeginnivan belfryimages ...</owners>
+    <licenseUrl>http://www.opensource.org/licenses/MS-PL</licenseUrl>
+    <projectUrl>http://www.code52.org/DownmarkerWPF/</projectUrl>
+    <iconUrl>https://github.com/Code52/DownmarkerWPF/raw/gh-pages/icon.png</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>This is the first version of the NuGet-based updater for MarkPad</description>
+  </metadata>
+</package>

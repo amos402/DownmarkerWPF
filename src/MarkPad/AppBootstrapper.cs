@@ -4,18 +4,20 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Windows;
 using System.Windows.Threading;
 using Autofac;
 using Caliburn.Micro;
+using Caliburn.Micro.Autofac;
 using MarkPad.Framework;
 using MarkPad.Framework.Events;
+using MarkPad.MarkPadExtensions;
 using MarkPad.Services;
 using MarkPad.Shell;
-using System.Windows;
 
 namespace MarkPad
 {
-    class AppBootstrapper : Caliburn.Micro.Autofac.AutofacBootstrapper<ShellViewModel>
+    class AppBootstrapper : AutofacBootstrapper<ShellViewModel>
     {
         private JumpListIntegration jumpList;
 
@@ -37,9 +39,26 @@ namespace MarkPad
 
         protected override void ConfigureContainer(ContainerBuilder builder)
         {
+            Func<string, Stream> pathResolver = a =>
+                                                    {
+                                                        var directory = Path.GetTempPath();
+                                                        var filePath = Path.Combine(directory, a);
+                                                        var dir = Path.GetDirectoryName(filePath);
+                                                        if (!Directory.Exists(dir))
+                                                        {
+                                                            Directory.CreateDirectory(dir);
+                                                        }
+                                                        return File.Open(filePath, FileMode.OpenOrCreate);
+                                                    };
+
+            builder.RegisterType<NSync.Client.UpdateManager>()
+                .AsImplementedInterfaces()
+                .WithParameter(new NamedParameter("url", "http://deploy.code52.org/markpad/releases"))
+                .WithParameter(new NamedParameter("openPathMock", pathResolver));
+
             builder.RegisterModule<ServicesModule>();
             builder.RegisterType<JumpListIntegration>().SingleInstance();
-			builder.RegisterModule<MarkPad.MarkPadExtensions.MarkPadExtensionsAutofacModule>();
+            builder.RegisterModule<MarkPadExtensionsAutofacModule>();
         }
 
         protected override void PrepareApplication()
@@ -52,7 +71,7 @@ namespace MarkPad
             Application.Exit += OnExit;
         }
 
-        protected override void OnStartup(object sender, System.Windows.StartupEventArgs e)
+        protected override void OnStartup(object sender, StartupEventArgs e)
         {
             base.OnStartup(sender, e);
 
@@ -69,7 +88,7 @@ namespace MarkPad
             // Handle the original arguments from the first run of this app.
             ((App)Application).HandleArguments(Environment.GetCommandLineArgs());
         }
-                
+
         protected override void OnExit(object sender, EventArgs e)
         {
             jumpList.Dispose();
@@ -135,9 +154,9 @@ namespace MarkPad
             {
                 var args = context.EventArgs as DragEventArgs;
 
-                if (args == null || !args.Data.GetDataPresent(System.Windows.DataFormats.FileDrop)) 
+                if (args == null || !args.Data.GetDataPresent(System.Windows.DataFormats.FileDrop))
                     return null;
-                
+
                 return (string[])args.Data.GetData(System.Windows.DataFormats.FileDrop);
             });
         }

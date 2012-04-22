@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Autofac;
+﻿using Autofac;
 
 namespace MarkPad.MarkPadExtensions
 {
@@ -11,8 +7,8 @@ namespace MarkPad.MarkPadExtensions
 		protected override void Load(ContainerBuilder builder)
 		{
 			builder
-				.RegisterType<MarkPad.MarkPadExtensions.SpellCheck.SpellCheckExtension>()
-				.As<MarkPad.MarkPadExtensions.SpellCheck.SpellCheckExtension>();
+				.RegisterType<SpellCheck.SpellCheckExtension>()
+				.As<SpellCheck.SpellCheckExtension>();
 		}
 	}
 }
