@@ -1,16 +1,19 @@
-﻿using MarkPad.Services.Metaweblog.Rsd;
+﻿using System.Threading.Tasks;
+using MarkPad.Services.Metaweblog.Rsd;
+using NSubstitute;
 using Xunit;
 
 namespace MarkPad.Tests.Services
 {
     public class RsdServiceTests
     {
-        readonly TestWebRequestFactory webRequestFactory;
+        readonly IWebRequestFactory webRequestFactory;
         readonly RsdService rsdService;
 
         public RsdServiceTests()
         {
-            webRequestFactory = new TestWebRequestFactory();
+            // webRequestFactory = new TestWebRequestFactory();
+            webRequestFactory = Substitute.For<IWebRequestFactory>();
             rsdService = new RsdService(webRequestFactory);
         }
 
@@ -18,8 +21,11 @@ namespace MarkPad.Tests.Services
         public void discovers_codeplex_metaweblog_api()
         {
             // arrange
-            webRequestFactory.RegisterResultForUri("http://project.codeplex.com", CodeplexProjectPage);
-            webRequestFactory.RegisterResultForUri("http://project.codeplex.com/rsd", CodeplexProjectRsdFile);
+            webRequestFactory.GetResult("http://project.codeplex.com")
+                             .Returns(TaskEx.FromResult(CodeplexProjectPage));
+
+            webRequestFactory.GetResult("http://project.codeplex.com/rsd")
+                             .Returns(TaskEx.FromResult(CodeplexProjectRsdFile));
 
             // act
             var result = rsdService.DiscoverAddress("http://project.codeplex.com").Result;
@@ -33,7 +39,8 @@ namespace MarkPad.Tests.Services
         public void discovers_site_with_rsdxml_file_in_root()
         {
             // arrange
-            webRequestFactory.RegisterResultForUri("http://funnelweblog.net/rsd.xml", FunnelWebRsdFile);
+            webRequestFactory.GetResult("http://funnelweblog.net/rsd.xml")
+                             .Returns(TaskEx.FromResult(FunnelWebRsdFile));
 
             // act
             var result = rsdService.DiscoverAddress("http://funnelweblog.net").Result;

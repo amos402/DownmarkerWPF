@@ -26,11 +26,10 @@ namespace MarkPad.Services.Metaweblog.Rsd
 
             var baseUri = new Uri(webAPI, UriKind.Absolute);
             var requestUri = new Uri(baseUri, "rsd.xml");
-            var rsdFileRequest = webRequestFactory.Create(requestUri);
+            var rsdFileRequest = webRequestFactory.GetResult(requestUri.AbsoluteUri);
 
             // Kick off the async discovery workflow
-            rsdFileRequest.GetResponseAsync()
-                .ContinueWith<DiscoveryResult>(ProcessRsdResponse)
+            rsdFileRequest.ContinueWith<DiscoveryResult>(ProcessRsdResponse)
                 .ContinueWith(c =>
                 {
                     if (c.Result.Success)
@@ -51,21 +50,23 @@ namespace MarkPad.Services.Metaweblog.Rsd
         {
             var taskCompletionSource = new TaskCompletionSource<DiscoveryResult>();
 
-            // Build a request to retrieve the contents of the specified URL directly
-            var requestUri = new Uri(webAPI, UriKind.Absolute);
-            var directWebAPIRequest = webRequestFactory.Create(requestUri);
-            
-            // Add a continuation that will only execute if the request succeeds and proceses the response to look for a <link> to the RSD
-            directWebAPIRequest.GetResponseAsync()
-                .ContinueWith(webAPIRequestAntecedent =>
+            var response = webRequestFactory.GetResult(webAPI);
+
+            response.ContinueWith(r =>
             {
-                if (webAPIRequestAntecedent.IsFaulted)
+                if (r.IsCanceled)
                 {
-                    taskCompletionSource.SetResult(new DiscoveryResult(webAPIRequestAntecedent.Exception));
+                    taskCompletionSource.SetCanceled();
                     return;
                 }
-                using (var webAPIResponse = webAPIRequestAntecedent.Result)
-                using (var streamReader = new StreamReader(GetResponseStream(webAPIResponse)))
+
+                if (r.Exception != null)
+                {
+                    taskCompletionSource.SetException(r.Exception);
+                    return;
+                }
+
+                using (var streamReader = new StreamReader(r.Result))
                 {
                     DiscoverRsdOnPage(webAPI, streamReader, taskCompletionSource);
                 }
@@ -99,8 +100,7 @@ namespace MarkPad.Services.Metaweblog.Rsd
             if (!rsdUri.IsAbsoluteUri)
                 rsdUri = new Uri(new Uri(webAPI, UriKind.Absolute), rsdUri);
 
-            var rdsWebRequest = webRequestFactory.Create(rsdUri);
-            var rdsWebRequestTask = rdsWebRequest.GetResponseAsync();
+            var rdsWebRequestTask = webRequestFactory.GetResult(rsdUri.AbsoluteUri);
 
             // Add a continuation that will only execute if the request succeeds and continues processing the RSD
             rdsWebRequestTask.ContinueWith(rdsWebRequestAntecedent =>
@@ -118,29 +118,26 @@ namespace MarkPad.Services.Metaweblog.Rsd
             return webAPIResponse.GetResponseStream();
         }
 
-        static DiscoveryResult ProcessRsdResponse(Task<WebResponse> webResponseTask)
+        static DiscoveryResult ProcessRsdResponse(Task<string> webResponseTask)
         {
             if (webResponseTask.IsFaulted)
                 return new DiscoveryResult(webResponseTask.Exception);
 
             try
             {
-                using (var webResponse = webResponseTask.Result)
+                using (var responseStream = new StreamReader(webResponseTask.Result))
                 {
-                    using (var responseStream = webResponse.GetResponseStream())
-                    {
-                        var document = XDocument.Load(responseStream);
-                        var apiElement = GetMetaWebLogElement(document);
-                        if (apiElement == null)
-                            return DiscoveryResult.Failed("Unable to get metaweblog api address from rds.xml");
+                    var document = XDocument.Load(responseStream);
+                    var apiElement = GetMetaWebLogElement(document);
+                    if (apiElement == null)
+                        return DiscoveryResult.Failed("Unable to get metaweblog api address from rds.xml");
 
-                        var xAttribute = apiElement.Attribute("apiLink");
-                        if (xAttribute == null)
-                            return DiscoveryResult.Failed("apiLink attribute not present for metaweblog api reference");
+                    var xAttribute = apiElement.Attribute("apiLink");
+                    if (xAttribute == null)
+                        return DiscoveryResult.Failed("apiLink attribute not present for metaweblog api reference");
 
-                        var webApiLink = xAttribute.Value;
-                        return new DiscoveryResult(webApiLink);
-                    }
+                    var webApiLink = xAttribute.Value;
+                    return new DiscoveryResult(webApiLink);
                 }
             }
             catch (Exception ex)
