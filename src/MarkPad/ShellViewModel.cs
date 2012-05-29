@@ -240,8 +240,10 @@ namespace MarkPad
             creator.Update(); // ensure that the markdown is rendered
 
             creator = documentCreator();
-            creator.Original = GetHelpText("MarkPadHelp"); // set the Original so it isn't marked as requiring a save unless we change it
-            creator.Document.Text = creator.Original;
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var text = GetHelpText("MarkPadHelp").Replace("{{Version}}", version.ToString());
+            creator.Original = text; // set the Original so it isn't marked as requiring a save unless we change it
+            creator.Document.Text = text;
             creator.Title = "MarkPad Help";
             MDI.Open(creator);
             creator.Update(); // ensure that the markdown is rendered
