@@ -560,3 +560,5 @@ copy $(SolutionDir)..\lib\icudt42.dll $(TargetDir)</PreBuildEvent>
     <PostBuildEvent>xcopy /s /y "$(SolutionDir)packages\NHunspell.1.0.0\native\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
 </Project>
+  <Import Project="$(SolutionDir)\..\Tools\Fody\Fody.targets" />
+</Project>
