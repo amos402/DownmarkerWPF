@@ -6,31 +6,39 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Threading;
 using Caliburn.Micro;
+using MarkPad.Settings;
+using MarkPad.Settings.Models;
 using Shimmer.Client;
 
 namespace MarkPad.Updater
 {
     public class UpdaterViewModel : PropertyChangedBase
     {
-        private readonly IWindowManager windowManager;
-        private readonly Func<UpdaterChangesViewModel> changesCreator;
+        readonly IWindowManager windowManager;
+        readonly Func<UpdaterChangesViewModel> changesCreator;
+        readonly ISettingsProvider settingsProvider;
 
         public int Progress { get; private set; }
         public UpdateState UpdateState { get; set; }
         public bool Background { get; set; }
 
-        public UpdaterViewModel(IWindowManager windowManager, Func<UpdaterChangesViewModel> changesCreator)
+        public UpdaterViewModel(IWindowManager windowManager, Func<UpdaterChangesViewModel> changesCreator, ISettingsProvider settingsProvider)
         {
             this.windowManager = windowManager;
             this.changesCreator = changesCreator;
+            this.settingsProvider = settingsProvider;
 
             DoUpdate();
         }
 
         public async void DoUpdate()
         {
+            var settings = settingsProvider.GetSettings<MarkPadSettings>();
+            var configUrl = settings.ConfigUrl;
+            var channel = settings.Channel;
+
             // XXX: Need to find a place for this
-            var updateManager = new UpdateManager(@"C:\Users\Paul\Documents\GitHub\DownmarkerWPF\src\Releases", "MarkPad", FrameworkVersion.Net40);
+            var updateManager = new UpdateManager(configUrl, channel, FrameworkVersion.Net40);
 
             try 
             {

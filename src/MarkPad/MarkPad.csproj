@@ -18,6 +18,7 @@
     <WarningLevel>4</WarningLevel>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <BuildPackage>true</BuildPackage>
     <Utf8Output>true</Utf8Output>
     <ExpressionBlendVersion>4.0.30816.0</ExpressionBlendVersion>
     <PublishUrl>publish\</PublishUrl>
@@ -132,14 +133,6 @@
     </Reference>
     <Reference Include="PropertyChanged">
       <HintPath>..\packages\PropertyChanged.Fody.1.32.2.0\Lib\NET40\PropertyChanged.dll</HintPath>
-    </Reference>
-    <Reference Include="Shimmer.Client, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Shimmer.Client.0.6.0.0-beta\lib\net40\Shimmer.Client.dll</HintPath>
-    </Reference>
-    <Reference Include="Shimmer.Core, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Shimmer.Core.0.6.0.0-beta\lib\net40\Shimmer.Core.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.Composition" />
@@ -593,4 +586,5 @@ copy $(SolutionDir)..\lib\icudt42.dll $(TargetDir)</PreBuildEvent>
   </PropertyGroup>
 </Project>
   <Import Project="$(SolutionDir)\..\Tools\Fody\Fody.targets" />
+</Project>
 </Project>
