@@ -21,6 +21,11 @@ namespace MarkPad.Updater
             DoUpdate();
         }
 
+        public void CheckForUpdate()
+        {
+            DoUpdate();
+        }
+
         public async void DoUpdate()
         {
             var settings = settingsProvider.GetSettings<MarkPadSettings>();
@@ -36,7 +41,8 @@ namespace MarkPad.Updater
                     return;
                 }
 
-                UpdateState = UpdateState.Downloading;   Background = true;
+                UpdateState = UpdateState.Downloading;  
+                Background = true;
                 await updateManager.DownloadReleasesAsync(updateInfo.ReleasesToApply, x => Progress += (x/3));
                 await updateManager.ApplyReleasesAsync(updateInfo, x => Progress += (x/3));
 

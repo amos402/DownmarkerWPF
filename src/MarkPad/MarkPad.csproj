@@ -101,8 +101,12 @@
     <Reference Include="ICSharpCode.AvalonEdit">
       <HintPath>..\packages\AvalonEdit.4.2.0.8783\lib\Net40\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\..\lib\Ionic.Zip.dll</HintPath>
+    </Reference>
     <Reference Include="MahApps.Metro">
       <HintPath>..\packages\MahApps.Metro.0.10.0.0\lib\net40\MahApps.Metro.dll</HintPath>
+    </Reference>
     <Reference Include="Ionic.Zip">
       <HintPath>..\packages\Shimmer.Core.0.5.0.1-beta\lib\net40\Ionic.Zip.dll</HintPath>
     </Reference>
@@ -128,6 +132,10 @@
     <Reference Include="NHunspell, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1ac793ea843b4366, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NHunspell.1.0.0\lib\net\NHunspell.dll</HintPath>
+    </Reference>
+    <Reference Include="NuGet.Core, Version=2.1.31002.9028, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Nuget.Core.2.1.0\lib\net40-Client\NuGet.Core.dll</HintPath>
     </Reference>
     <Reference Include="Ookii.Dialogs.Wpf">
       <HintPath>..\packages\Ookii.Dialogs.1.0\lib\net35\Ookii.Dialogs.Wpf.dll</HintPath>
@@ -179,6 +187,7 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Windows.Interactivity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Caliburn.Micro.1.4.1\lib\net40\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Windows.Interactivity">
       <HintPath>..\packages\MahApps.Metro.0.10.0.0\lib\net40\System.Windows.Interactivity.dll</HintPath>
     </Reference>
@@ -522,10 +531,6 @@
       <Project>{d1ef806f-2daf-47b3-aa55-eb841adbd4ef}</Project>
       <Name>MarkPad.PreviewControl</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Plugins\ExportToHtmlPlugin\ExportToHtmlPlugin.csproj">
-      <Project>{F5EF3169-748F-4C96-A4A1-F33381572619}</Project>
-      <Name>ExportToHtmlPlugin</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Fonts\Entypo.ttf" />
@@ -594,7 +599,4 @@ copy $(SolutionDir)..\lib\en-US.dll $(TargetDir)
 copy $(SolutionDir)..\lib\icudt42.dll $(TargetDir)</PreBuildEvent>
     <PostBuildEvent>xcopy /s /y "$(SolutionDir)packages\NHunspell.1.0.0\native\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
-</Project>
-  <Import Project="$(SolutionDir)\..\Tools\Fody\Fody.targets" />
-</Project>
 </Project>

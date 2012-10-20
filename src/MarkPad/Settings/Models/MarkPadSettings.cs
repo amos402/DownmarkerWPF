@@ -28,10 +28,10 @@ namespace MarkPad.Settings.Models
         [DefaultValue(SpellingLanguages.Australian)]
         public SpellingLanguages Language { get; set; }
 
-        [DefaultValue("https://github.com/Code52/markpad-releases/releases/")]
+        [DefaultValue("http://code52.org/markpad-releases/dev")]
         public string ConfigUrl { get; set; }
 
-        [DefaultValue("markpad-dev")]
+        [DefaultValue("markpad")]
         public string Channel { get; set; }
     }
 }
